@@ -1,8 +1,9 @@
+import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import { AppModule } from './app.module';
-import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -12,6 +13,8 @@ async function bootstrap() {
   app.setBaseViewsDir(join(__dirname, '..', 'views')); // view
 
   app.setViewEngine('ejs');
+  app.useGlobalPipes(new ValidationPipe());
+
   await app.listen(configService.get<string>('PORT'));
 }
 bootstrap();
