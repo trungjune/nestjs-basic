@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { genSaltSync, hashSync } from 'bcryptjs';
+import { compareSync, genSaltSync, hashSync } from 'bcryptjs';
 import mongoose, { Model } from 'mongoose';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './schemas/user.schema';
@@ -38,6 +38,16 @@ export class UsersService {
     return this.userModel.findOne({
       _id: id,
     });
+  }
+
+  findOneByUsername(username: string) {
+    return this.userModel.findOne({
+      email: username,
+    });
+  }
+
+  isValidPassword(password: string, hash: string) {
+    return compareSync(password, hash);
   }
 
   async update(updateUserDto: UpdateUserDto) {
