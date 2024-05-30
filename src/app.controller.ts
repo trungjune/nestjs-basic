@@ -11,7 +11,7 @@ import { AppService } from './app.service';
 import { LocalAuthGuard } from './auth/local-auth.guard';
 import { AuthService } from './auth/auth.service';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
-import { Public } from './auth/decorator/customize';
+import { Public } from './decorator/customize';
 
 @Controller()
 export class AppController {
