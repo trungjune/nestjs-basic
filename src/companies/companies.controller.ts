@@ -16,8 +16,8 @@ export class CompaniesController {
   constructor(private readonly companiesService: CompaniesService) {}
 
   @Post()
-  create(@Body() createCompanyDto: CreateCompanyDto) {
-    return this.companiesService.create(createCompanyDto);
+  create(@Body() createUserDto: CreateCompanyDto) {
+    return this.companiesService.create(createUserDto);
   }
 
   @Get()
@@ -27,16 +27,16 @@ export class CompaniesController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.companiesService.findOne(+id);
+    return this.companiesService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCompanyDto: UpdateCompanyDto) {
-    return this.companiesService.update(+id, updateCompanyDto);
+  @Patch()
+  update(@Body() updateUserDto: UpdateCompanyDto) {
+    return this.companiesService.update(updateUserDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.companiesService.remove(+id);
+    return this.companiesService.remove(id);
   }
 }
