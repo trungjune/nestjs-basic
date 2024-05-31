@@ -15,26 +15,5 @@ import { Public } from './decorator/customize';
 
 @Controller()
 export class AppController {
-  constructor(
-    private readonly appService: AppService,
-    private configService: ConfigService,
-    private authService: AuthService,
-  ) {}
-
-  @Public()
-  @UseGuards(LocalAuthGuard)
-  @Post('/login')
-  handleLogin(@Request() req) {
-    return this.authService.login(req.user);
-  }
-
-  @Get('profile')
-  getProfile(@Request() req) {
-    return req.user;
-  }
-
-  @Get('profile1')
-  getProfile1(@Request() req) {
-    return req.user;
-  }
+  constructor(private authService: AuthService) {}
 }
