@@ -1,12 +1,14 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
 } from '@nestjs/common';
+import { User } from 'src/decorator/customize';
+import { IUser } from 'src/users/users.inteface';
 import { CompaniesService } from './companies.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
@@ -16,8 +18,8 @@ export class CompaniesController {
   constructor(private readonly companiesService: CompaniesService) {}
 
   @Post()
-  create(@Body() createUserDto: CreateCompanyDto) {
-    return this.companiesService.create(createUserDto);
+  create(@Body() createUserDto: CreateCompanyDto, @User() user: IUser) {
+    return this.companiesService.create(createUserDto, user);
   }
 
   @Get()
