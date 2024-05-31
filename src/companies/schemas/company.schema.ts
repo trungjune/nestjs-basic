@@ -21,7 +21,7 @@ export class Company {
   updatedBy: { _id: mongoose.Schema.Types.ObjectId; email: string };
 
   @Prop({ type: Object })
-  deleteBy: { _id: mongoose.Schema.Types.ObjectId; email: string };
+  deletedBy: { _id: mongoose.Schema.Types.ObjectId; email: string };
 
   @Prop()
   createdAt: Date;

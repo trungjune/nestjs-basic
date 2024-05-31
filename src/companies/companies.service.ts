@@ -43,18 +43,31 @@ export class CompaniesService {
     });
   }
 
-  async update(updateCompanyDto: UpdateCompanyDto) {
+  async update(id: string, updateCompanyDto: UpdateCompanyDto, user: IUser) {
     return await this.companiesModel.updateOne(
+      { _id: id },
       {
-        _id: updateCompanyDto._id,
+        ...updateCompanyDto,
+        createdBy: {
+          _id: user._id,
+          email: user.email,
+        },
       },
-      { ...updateCompanyDto },
     );
   }
 
-  remove(id: string) {
+  async remove(id: string, user: IUser) {
     if (!mongoose.Types.ObjectId.isValid(id)) return `No user with id: ${id}`;
 
+    await this.companiesModel.updateOne(
+      { _id: id },
+      {
+        deletedBy: {
+          _id: user._id,
+          email: user.email,
+        },
+      },
+    );
     return this.companiesModel.softDelete({
       _id: id,
     });
