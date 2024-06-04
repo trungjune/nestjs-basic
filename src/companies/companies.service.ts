@@ -6,9 +6,9 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Company, CompanyDocument } from './schemas/company.schema';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import mongoose from 'mongoose';
-import { IUser } from 'src/users/users.inteface';
 import aqp from 'api-query-params';
 import { isEmpty } from 'class-validator';
+import { IUser } from 'src/users/user.interface';
 
 @Injectable()
 export class CompaniesService {
@@ -34,16 +34,15 @@ export class CompaniesService {
     delete filter.page;
     delete filter.limit;
 
-    // return this.companiesModel.find(filter);
-
     const offset = (+currentPage - 1) * +limit;
     const defaultLimit = +limit ? +limit : 10;
     const totalItems = (await this.companiesModel.find(filter)).length;
-
     const totalPages = Math.ceil(totalItems / defaultLimit);
+
     if (isEmpty(sort)) {
       sort = '-updatedAt';
     }
+
     const result = await this.companiesModel
       .find(filter)
       .skip(offset)

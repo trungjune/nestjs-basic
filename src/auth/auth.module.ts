@@ -1,13 +1,15 @@
 import { Module } from '@nestjs/common';
+import { AuthService } from './auth.service';
+import { UsersModule } from '../users/users.module';
+import { PassportModule } from '@nestjs/passport';
+import { LocalStrategy } from './passport/local.strategy';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import { PassportModule } from '@nestjs/passport';
-import ms from 'ms';
-import { UsersModule } from 'src/users/users.module';
-import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
 import { JwtStrategy } from './passport/jwt.strategy';
-import { LocalStrategy } from './passport/local.strategy';
+import ms from 'ms';
+import { AuthController } from './auth.controller';
+import { MongooseModule } from '@nestjs/mongoose';
+import { User, UserSchema } from 'src/users/schemas/user.schema';
 
 @Module({
   imports: [
@@ -16,13 +18,14 @@ import { LocalStrategy } from './passport/local.strategy';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_ACCESS_TOKEN'),
+        secret: configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
         signOptions: {
-          expiresIn: ms(configService.get<string>('JWT_ACCESS_EXPIRE')),
+          expiresIn: ms(configService.get<string>('JWT_ACCESS_EXPIRE')) / 1000,
         },
       }),
       inject: [ConfigService],
     }),
+    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
   ],
   providers: [AuthService, LocalStrategy, JwtStrategy],
   exports: [AuthService],
