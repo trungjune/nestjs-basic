@@ -6,6 +6,7 @@ import { join } from 'path';
 import { AppModule } from './app.module';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { TransformInterceptor } from './core/transform.interceptor';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -20,6 +21,9 @@ async function bootstrap() {
 
   app.setViewEngine('ejs');
   app.useGlobalPipes(new ValidationPipe());
+
+  //config cookie
+  app.use(cookieParser());
 
   //config cors
   app.enableCors({

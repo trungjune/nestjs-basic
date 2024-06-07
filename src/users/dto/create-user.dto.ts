@@ -36,8 +36,8 @@ export class CreateUserDto {
   @IsNotEmpty({ message: 'Address is required' })
   address: string;
 
-  @IsNotEmpty({ message: 'Role is required' })
-  @IsMongoId({ message: 'Role is invalid' })
+  // @IsNotEmpty({ message: 'Role is required' })
+  // @IsMongoId({ message: 'Role is invalid' })
   role: mongoose.Schema.Types.ObjectId;
 
   @IsNotEmptyObject()

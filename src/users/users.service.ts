@@ -85,16 +85,11 @@ export class UsersService {
       throw new BadRequestException('not found user');
     }
 
-    return await this.userModel
-      .findOne({ _id: id })
-      .select('-password')
-      .populate({ path: 'role', select: { name: 1, _id: 1 } });
+    return await this.userModel.findOne({ _id: id }).select('-password');
   }
 
   async findOneByUsername(username: string) {
-    return await this.userModel
-      .findOne({ email: username })
-      .populate({ path: 'role', select: { name: 1 } });
+    return await this.userModel.findOne({ email: username });
   }
 
   isValidPassword(password: string, hash: string) {
@@ -143,8 +138,6 @@ export class UsersService {
   }
 
   async findUserByToken(refreshToken: string) {
-    return await this.userModel
-      .findOne({ refreshToken })
-      .populate({ path: 'role', select: { name: 1 } });
+    return await this.userModel.findOne({ refreshToken });
   }
 }
