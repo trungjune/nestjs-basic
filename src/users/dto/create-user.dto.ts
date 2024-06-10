@@ -1,21 +1,21 @@
 import { Type } from 'class-transformer';
 import {
-  IsNotEmpty,
   IsEmail,
+  IsNotEmpty,
   IsNotEmptyObject,
   IsObject,
   ValidateNested,
-  IsMongoId,
 } from 'class-validator';
 import mongoose from 'mongoose';
 
-class Company {
+export class Company {
   @IsNotEmpty()
   _id: mongoose.Schema.Types.ObjectId;
 
   @IsNotEmpty()
   name: string;
 }
+
 export class CreateUserDto {
   @IsNotEmpty({ message: 'Name is required' })
   name: string;
