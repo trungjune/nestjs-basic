@@ -6,6 +6,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { CompaniesModule } from './companies/companies.module';
+import { FilesModule } from './files/files.module';
 import { JobsModule } from './jobs/jobs.module';
 import { UsersModule } from './users/users.module';
 
@@ -29,6 +30,7 @@ import { UsersModule } from './users/users.module';
     AuthModule,
     CompaniesModule,
     JobsModule,
+    FilesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
