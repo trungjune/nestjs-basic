@@ -1,31 +1,33 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import aqp from 'api-query-params';
+import mongoose from 'mongoose';
+import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
+import { IUser } from 'src/users/user.interface';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
-import { InjectModel } from '@nestjs/mongoose';
 import { Company, CompanyDocument } from './schemas/company.schema';
-import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
-import mongoose from 'mongoose';
-import aqp from 'api-query-params';
 import { isEmpty } from 'class-validator';
-import { IUser } from 'src/users/user.interface';
 
 @Injectable()
 export class CompaniesService {
   constructor(
     @InjectModel(Company.name)
-    private companiesModel: SoftDeleteModel<CompanyDocument>,
+    private companyModel: SoftDeleteModel<CompanyDocument>,
   ) {}
 
   async create(createCompanyDto: CreateCompanyDto, user: IUser) {
-    const company = await this.companiesModel.create({
+    const company = await this.companyModel.create({
       ...createCompanyDto,
       createdBy: {
         _id: user._id,
         email: user.email,
       },
     });
-    return company;
+    return {
+      _id: company._id,
+      createdAt: company?.createdAt,
+    };
   }
 
   async findAll(currentPage: number, limit: number, qs: string) {
@@ -36,14 +38,15 @@ export class CompaniesService {
 
     const offset = (+currentPage - 1) * +limit;
     const defaultLimit = +limit ? +limit : 10;
-    const totalItems = (await this.companiesModel.find(filter)).length;
+
+    const totalItems = (await this.companyModel.find(filter)).length;
     const totalPages = Math.ceil(totalItems / defaultLimit);
 
     if (isEmpty(sort)) {
       sort = '-updatedAt';
     }
 
-    const result = await this.companiesModel
+    const result = await this.companyModel
       .find(filter)
       .skip(offset)
       .limit(defaultLimit)
@@ -62,26 +65,23 @@ export class CompaniesService {
     };
   }
 
-  findOne(id: string) {
-    if (!mongoose.Types.ObjectId.isValid(id)) return `No user with id: ${id}`;
-
-    return this.companiesModel.findOne({
-      _id: id,
-    });
-  }
-
-  findOneByName(name: string) {
-    return this.companiesModel.findOne({
-      name: name,
-    });
+  async findOne(id: string) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('not found company');
+    }
+    return await this.companyModel.findById(id);
   }
 
   async update(id: string, updateCompanyDto: UpdateCompanyDto, user: IUser) {
-    return await this.companiesModel.updateOne(
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('not found company');
+    }
+
+    return await this.companyModel.updateOne(
       { _id: id },
       {
         ...updateCompanyDto,
-        createdBy: {
+        updatedBy: {
           _id: user._id,
           email: user.email,
         },
@@ -90,9 +90,11 @@ export class CompaniesService {
   }
 
   async remove(id: string, user: IUser) {
-    if (!mongoose.Types.ObjectId.isValid(id)) return `No user with id: ${id}`;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('not found company');
+    }
 
-    await this.companiesModel.updateOne(
+    await this.companyModel.updateOne(
       { _id: id },
       {
         deletedBy: {
@@ -101,8 +103,6 @@ export class CompaniesService {
         },
       },
     );
-    return this.companiesModel.softDelete({
-      _id: id,
-    });
+    return await this.companyModel.softDelete({ _id: id });
   }
 }

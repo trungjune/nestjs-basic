@@ -14,14 +14,26 @@ export class Company {
   @Prop()
   description: string;
 
-  @Prop({ type: Object })
-  createdBy: { _id: mongoose.Schema.Types.ObjectId; email: string };
+  @Prop()
+  logo: string;
 
   @Prop({ type: Object })
-  updatedBy: { _id: mongoose.Schema.Types.ObjectId; email: string };
+  createdBy: {
+    _id: mongoose.Schema.Types.ObjectId;
+    email: string;
+  };
 
   @Prop({ type: Object })
-  deletedBy: { _id: mongoose.Schema.Types.ObjectId; email: string };
+  updatedBy: {
+    _id: mongoose.Schema.Types.ObjectId;
+    email: string;
+  };
+
+  @Prop({ type: Object })
+  deletedBy: {
+    _id: mongoose.Schema.Types.ObjectId;
+    email: string;
+  };
 
   @Prop()
   createdAt: Date;
@@ -33,7 +45,7 @@ export class Company {
   isDeleted: boolean;
 
   @Prop()
-  deletedAt: Date;
+  deleteAt: Date;
 }
 
 export const CompanySchema = SchemaFactory.createForClass(Company);
