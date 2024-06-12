@@ -5,28 +5,32 @@ import { isEmpty } from 'class-validator';
 import mongoose from 'mongoose';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { IUser } from 'src/users/user.interface';
-import { CreateCompanyDto } from './dto/create-company.dto';
-import { UpdateCompanyDto } from './dto/update-company.dto';
-import { Company, CompanyDocument } from './schemas/company.schema';
+import { CreatePermissionDto } from './dto/create-permission.dto';
+import { UpdatePermissionDto } from './dto/update-permission.dto';
+import { Permission, PermissionDocument } from './schemas/permission.schema';
 
 @Injectable()
-export class CompaniesService {
+export class PermissionsService {
   constructor(
-    @InjectModel(Company.name)
-    private companyModel: SoftDeleteModel<CompanyDocument>,
+    @InjectModel(Permission.name)
+    private permissionModel: SoftDeleteModel<PermissionDocument>,
   ) {}
 
-  async create(createCompanyDto: CreateCompanyDto, user: IUser) {
-    const company = await this.companyModel.create({
-      ...createCompanyDto,
+  async create(createPermissionDto: CreatePermissionDto, user: IUser) {
+    const { apiPath, method } = createPermissionDto;
+    const isExist = await this.permissionModel.findOne({ apiPath, method });
+    if (isExist) throw new BadRequestException('permission is exist');
+
+    const permission = await this.permissionModel.create({
+      ...createPermissionDto,
       createdBy: {
         _id: user._id,
         email: user.email,
       },
     });
     return {
-      _id: company._id,
-      createdAt: company?.createdAt,
+      _id: permission._id,
+      createdAt: permission?.createdAt,
     };
   }
 
@@ -40,14 +44,14 @@ export class CompaniesService {
     const offset = (+currentPage - 1) * +limit;
     const defaultLimit = +limit ? +limit : 10;
 
-    const totalItems = (await this.companyModel.find(filter)).length;
+    const totalItems = (await this.permissionModel.find(filter)).length;
     const totalPages = Math.ceil(totalItems / defaultLimit);
 
     if (isEmpty(sort)) {
       sort = '-updatedAt';
     }
 
-    const result = await this.companyModel
+    const result = await this.permissionModel
       .find(filter)
       .skip(offset)
       .limit(defaultLimit)
@@ -68,20 +72,25 @@ export class CompaniesService {
 
   async findOne(id: string) {
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      throw new BadRequestException('not found company');
+      throw new BadRequestException('not found permission');
     }
-    return await this.companyModel.findById(id);
+
+    return await this.permissionModel.findOne({ _id: id });
   }
 
-  async update(id: string, updateCompanyDto: UpdateCompanyDto, user: IUser) {
+  async update(
+    id: string,
+    updatePermissionDto: UpdatePermissionDto,
+    user: IUser,
+  ) {
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      throw new BadRequestException('not found company');
+      throw new BadRequestException('not found permission');
     }
 
-    return await this.companyModel.updateOne(
+    return await this.permissionModel.updateOne(
       { _id: id },
       {
-        ...updateCompanyDto,
+        ...updatePermissionDto,
         updatedBy: {
           _id: user._id,
           email: user.email,
@@ -92,10 +101,9 @@ export class CompaniesService {
 
   async remove(id: string, user: IUser) {
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      throw new BadRequestException('not found company');
+      throw new BadRequestException('not found permission');
     }
-
-    await this.companyModel.updateOne(
+    await this.permissionModel.updateOne(
       { _id: id },
       {
         deletedBy: {
@@ -104,6 +112,6 @@ export class CompaniesService {
         },
       },
     );
-    return await this.companyModel.softDelete({ _id: id });
+    return await this.permissionModel.softDelete({ _id: id });
   }
 }

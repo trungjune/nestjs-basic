@@ -4,29 +4,34 @@ import aqp from 'api-query-params';
 import { isEmpty } from 'class-validator';
 import mongoose from 'mongoose';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
+import { ADMIN_ROLE } from 'src/databases/sample';
 import { IUser } from 'src/users/user.interface';
-import { CreateCompanyDto } from './dto/create-company.dto';
-import { UpdateCompanyDto } from './dto/update-company.dto';
-import { Company, CompanyDocument } from './schemas/company.schema';
+import { CreateRoleDto } from './dto/create-role.dto';
+import { UpdateRoleDto } from './dto/update-role.dto';
+import { Role, RoleDocument } from './schemas/role.schema';
 
 @Injectable()
-export class CompaniesService {
+export class RolesService {
   constructor(
-    @InjectModel(Company.name)
-    private companyModel: SoftDeleteModel<CompanyDocument>,
+    @InjectModel(Role.name)
+    private roleModel: SoftDeleteModel<RoleDocument>,
   ) {}
 
-  async create(createCompanyDto: CreateCompanyDto, user: IUser) {
-    const company = await this.companyModel.create({
-      ...createCompanyDto,
+  async create(createRoleDto: CreateRoleDto, user: IUser) {
+    const { name } = createRoleDto;
+    const isExist = await this.roleModel.findOne({ name });
+    if (isExist) throw new BadRequestException('role is exist');
+
+    const role = await this.roleModel.create({
+      ...createRoleDto,
       createdBy: {
         _id: user._id,
         email: user.email,
       },
     });
     return {
-      _id: company._id,
-      createdAt: company?.createdAt,
+      _id: role._id,
+      createdAt: role?.createdAt,
     };
   }
 
@@ -40,14 +45,14 @@ export class CompaniesService {
     const offset = (+currentPage - 1) * +limit;
     const defaultLimit = +limit ? +limit : 10;
 
-    const totalItems = (await this.companyModel.find(filter)).length;
+    const totalItems = (await this.roleModel.find(filter)).length;
     const totalPages = Math.ceil(totalItems / defaultLimit);
 
     if (isEmpty(sort)) {
       sort = '-updatedAt';
     }
 
-    const result = await this.companyModel
+    const result = await this.roleModel
       .find(filter)
       .skip(offset)
       .limit(defaultLimit)
@@ -68,20 +73,28 @@ export class CompaniesService {
 
   async findOne(id: string) {
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      throw new BadRequestException('not found company');
+      throw new BadRequestException('not found role');
     }
-    return await this.companyModel.findById(id);
+
+    return await this.roleModel.findOne({ _id: id }).populate({
+      path: 'permissions',
+      select: { _id: 1, name: 1, apiPath: 1, method: 1, module: 1 },
+    });
   }
 
-  async update(id: string, updateCompanyDto: UpdateCompanyDto, user: IUser) {
+  async update(id: string, updateRoleDto: UpdateRoleDto, user: IUser) {
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      throw new BadRequestException('not found company');
+      throw new BadRequestException('not found role');
     }
 
-    return await this.companyModel.updateOne(
+    // const { name } = updateRoleDto;
+    // const isExist = await this.roleModel.findOne({ name });
+    // if (isExist) throw new BadRequestException('role is exist');
+
+    return await this.roleModel.updateOne(
       { _id: id },
       {
-        ...updateCompanyDto,
+        ...updateRoleDto,
         updatedBy: {
           _id: user._id,
           email: user.email,
@@ -92,10 +105,13 @@ export class CompaniesService {
 
   async remove(id: string, user: IUser) {
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      throw new BadRequestException('not found company');
+      throw new BadRequestException('not found role');
     }
 
-    await this.companyModel.updateOne(
+    const foundUser = await this.roleModel.findOne({ _id: id });
+    if (foundUser.name === ADMIN_ROLE)
+      throw new BadRequestException('can not delete ADMIN role');
+    await this.roleModel.updateOne(
       { _id: id },
       {
         deletedBy: {
@@ -104,6 +120,6 @@ export class CompaniesService {
         },
       },
     );
-    return await this.companyModel.softDelete({ _id: id });
+    return await this.roleModel.softDelete({ _id: id });
   }
 }
