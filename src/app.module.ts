@@ -6,6 +6,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { CompaniesModule } from './companies/companies.module';
+import { DatabasesModule } from './databases/databases.module';
 import { FilesModule } from './files/files.module';
 import { JobsModule } from './jobs/jobs.module';
 import { PermissionsModule } from './permissions/permissions.module';
@@ -18,7 +19,7 @@ import { UsersModule } from './users/users.module';
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>('MONGODB_URI'),
+        uri: configService.get<string>('MONGO_URL'),
         connectionFactory: (connection) => {
           connection.plugin(softDeletePlugin);
           return connection;
@@ -37,6 +38,7 @@ import { UsersModule } from './users/users.module';
     ResumesModule,
     PermissionsModule,
     RolesModule,
+    DatabasesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

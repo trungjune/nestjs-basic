@@ -5,11 +5,13 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Response } from 'express';
 import ms from 'ms';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
+import { USER_ROLE } from 'src/databases/sample';
+import { RolesService } from 'src/roles/roles.service';
+import { Role, RoleDocument } from 'src/roles/schemas/role.schema';
 import { RegisterUserDto } from 'src/users/dto/create-user.dto';
 import { User, UserDocument } from 'src/users/schemas/user.schema';
+import { IUser } from 'src/users/users.interface';
 import { UsersService } from '../users/users.service';
-
-import { IUser } from 'src/users/user.interface';
 @Injectable()
 export class AuthService {
   constructor(
@@ -21,6 +23,10 @@ export class AuthService {
     private userModel: SoftDeleteModel<UserDocument>,
 
     private configService: ConfigService,
+
+    @InjectModel(Role.name) private roleModel: SoftDeleteModel<RoleDocument>,
+
+    private roleService: RolesService,
   ) {}
 
   async validateUser(username: string, pass: string): Promise<any> {
@@ -28,8 +34,11 @@ export class AuthService {
     if (user) {
       const isValid = this.usersService.isValidPassword(pass, user.password);
       if (isValid === true) {
+        const userRole = user.role as unknown as { _id: string; name: string };
+        const temp = await this.roleService.findOne(userRole._id);
         const objUser = {
           ...user.toObject(),
+          permissions: temp?.permissions ?? [],
         };
         return objUser;
       }
@@ -38,7 +47,7 @@ export class AuthService {
   }
 
   async login(user: IUser, response: Response) {
-    const { _id, name, email, role } = user;
+    const { _id, name, email, role, permissions } = user;
     const payload = {
       sub: 'token login',
       iss: 'from server',
@@ -66,6 +75,7 @@ export class AuthService {
         name,
         email,
         role,
+        permissions,
       },
     };
   }
@@ -79,11 +89,15 @@ export class AuthService {
       throw new BadRequestException('Email already exist');
     }
 
+    //fetch user role
+    const userRole = await this.roleModel.findOne({ name: USER_ROLE });
+
     registerUserDto.password = this.usersService.getHashPassword(
       registerUserDto.password,
     );
     const user = await this.userModel.create({
       ...registerUserDto,
+      role: userRole?._id,
     });
     return {
       _id: user?._id,
@@ -125,6 +139,7 @@ export class AuthService {
 
         //fetch user role
         const userRole = user.role as unknown as { _id: string; name: string };
+        const temp = await this.roleService.findOne(userRole._id);
 
         // set cookie
         response.clearCookie('refresh_token');
@@ -136,10 +151,13 @@ export class AuthService {
 
         return {
           access_token: this.jwtService.sign(payload),
-          _id,
-          name,
-          email,
-          role,
+          user: {
+            _id,
+            name,
+            email,
+            role,
+            permissions: temp?.permissions ?? [],
+          },
         };
       }
     } catch (error) {

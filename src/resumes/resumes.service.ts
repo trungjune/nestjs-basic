@@ -4,7 +4,7 @@ import aqp from 'api-query-params';
 import { isEmpty } from 'class-validator';
 import mongoose from 'mongoose';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
-import { IUser } from 'src/users/user.interface';
+import { IUser } from 'src/users/users.interface';
 import { CreateUserCvDto } from './dto/create-resume.dto';
 import { Resume, ResumeDocument } from './schemas/resume.schema';
 

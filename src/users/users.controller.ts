@@ -11,7 +11,7 @@ import {
 import { Public, ResponseMessage, UserDecor } from 'src/decorator/customize';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { IUser } from './user.interface';
+import { IUser } from './users.interface';
 import { UsersService } from './users.service';
 
 @Controller('users')

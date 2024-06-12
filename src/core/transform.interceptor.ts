@@ -1,8 +1,8 @@
 import {
+  CallHandler,
+  ExecutionContext,
   Injectable,
   NestInterceptor,
-  ExecutionContext,
-  CallHandler,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
@@ -11,10 +11,9 @@ import { RESPONSE_MESSAGE } from 'src/decorator/customize';
 
 export interface Response<T> {
   statusCode: number;
-  message: string;
+  message?: string;
   data: any;
 }
-
 @Injectable()
 export class TransformInterceptor<T>
   implements NestInterceptor<T, Response<T>>

@@ -1,6 +1,7 @@
 import { Type } from 'class-transformer';
 import {
   IsEmail,
+  IsMongoId,
   IsNotEmpty,
   IsNotEmptyObject,
   IsObject,
@@ -8,14 +9,13 @@ import {
 } from 'class-validator';
 import mongoose from 'mongoose';
 
-export class Company {
+class Company {
   @IsNotEmpty()
   _id: mongoose.Schema.Types.ObjectId;
 
   @IsNotEmpty()
   name: string;
 }
-
 export class CreateUserDto {
   @IsNotEmpty({ message: 'Name is required' })
   name: string;
@@ -36,8 +36,8 @@ export class CreateUserDto {
   @IsNotEmpty({ message: 'Address is required' })
   address: string;
 
-  // @IsNotEmpty({ message: 'Role is required' })
-  // @IsMongoId({ message: 'Role is invalid' })
+  @IsNotEmpty({ message: 'Role is required' })
+  @IsMongoId({ message: 'Role is invalid' })
   role: mongoose.Schema.Types.ObjectId;
 
   @IsNotEmptyObject()

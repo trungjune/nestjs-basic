@@ -8,7 +8,7 @@ import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User, UserDocument } from './schemas/user.schema';
-import { IUser } from './user.interface';
+import { IUser } from './users.interface';
 
 @Injectable()
 export class UsersService {
@@ -48,12 +48,12 @@ export class UsersService {
   async findAll(currentPage: number, limit: number, qs: string) {
     const { filter, projection, population } = aqp(qs);
     let { sort }: { sort: any } = aqp(qs);
-
     delete filter.current;
     delete filter.pageSize;
 
     const offset = (+currentPage - 1) * +limit;
     const defaultLimit = +limit ? +limit : 10;
+
     const totalItems = (await this.userModel.find(filter)).length;
     const totalPages = Math.ceil(totalItems / defaultLimit);
 
@@ -65,8 +65,8 @@ export class UsersService {
       .find(filter)
       .skip(offset)
       .limit(defaultLimit)
-      .select('-password')
       .sort(sort)
+      .select('-password')
       .populate(population)
       .exec();
 
@@ -86,11 +86,16 @@ export class UsersService {
       throw new BadRequestException('not found user');
     }
 
-    return await this.userModel.findOne({ _id: id }).select('-password');
+    return await this.userModel
+      .findOne({ _id: id })
+      .select('-password')
+      .populate({ path: 'role', select: { name: 1, _id: 1 } });
   }
 
   async findOneByUsername(username: string) {
-    return await this.userModel.findOne({ email: username });
+    return await this.userModel
+      .findOne({ email: username })
+      .populate({ path: 'role', select: { name: 1 } });
   }
 
   isValidPassword(password: string, hash: string) {
@@ -139,6 +144,8 @@ export class UsersService {
   }
 
   async findUserByToken(refreshToken: string) {
-    return await this.userModel.findOne({ refreshToken });
+    return await this.userModel
+      .findOne({ refreshToken })
+      .populate({ path: 'role', select: { name: 1 } });
   }
 }

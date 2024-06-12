@@ -5,7 +5,7 @@ import { isEmpty } from 'class-validator';
 import mongoose from 'mongoose';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { ADMIN_ROLE } from 'src/databases/sample';
-import { IUser } from 'src/users/user.interface';
+import { IUser } from 'src/users/users.interface';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { Role, RoleDocument } from './schemas/role.schema';
