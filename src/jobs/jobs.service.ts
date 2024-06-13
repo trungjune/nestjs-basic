@@ -1,7 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import aqp from 'api-query-params';
-import { isEmpty } from 'class-validator';
 import mongoose from 'mongoose';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { IUser } from 'src/users/users.interface';
@@ -31,8 +30,8 @@ export class JobsService {
   }
 
   async findAll(currentPage: number, limit: number, qs: string) {
-    const { filter, projection, population } = aqp(qs);
-    let { sort }: { sort: any } = aqp(qs);
+    const { sort, filter, projection, population } = aqp(qs);
+    let {}: { sort: any } = aqp(qs);
 
     delete filter.current;
     delete filter.pageSize;
@@ -42,15 +41,11 @@ export class JobsService {
     const totalItems = (await this.jobModel.find(filter)).length;
     const totalPages = Math.ceil(totalItems / defaultLimit);
 
-    if (isEmpty(sort)) {
-      sort = '-updatedAt';
-    }
-
     const result = await this.jobModel
       .find(filter)
       .skip(offset)
       .limit(defaultLimit)
-      .sort(sort)
+      .sort(sort as any)
       .populate(population)
       .exec();
 

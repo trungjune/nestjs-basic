@@ -9,9 +9,11 @@ import { CompaniesModule } from './companies/companies.module';
 import { DatabasesModule } from './databases/databases.module';
 import { FilesModule } from './files/files.module';
 import { JobsModule } from './jobs/jobs.module';
+import { MailModule } from './mail/mail.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import { ResumesModule } from './resumes/resumes.module';
 import { RolesModule } from './roles/roles.module';
+import { SubscribersModule } from './subscribers/subscribers.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
@@ -19,7 +21,7 @@ import { UsersModule } from './users/users.module';
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>('MONGO_URL'),
+        uri: configService.get<string>('MONGODB_URI'),
         connectionFactory: (connection) => {
           connection.plugin(softDeletePlugin);
           return connection;
@@ -39,6 +41,8 @@ import { UsersModule } from './users/users.module';
     PermissionsModule,
     RolesModule,
     DatabasesModule,
+    SubscribersModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],
