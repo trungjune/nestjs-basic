@@ -7,10 +7,12 @@ import {
   Patch,
   Post,
   UploadedFile,
+  UseFilters,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
+import { HttpExceptionFilter } from 'src/core/http-exeption.filter';
 import { ResponseMessage } from 'src/decorator/customize';
 import { UpdateFileDto } from './dto/update-file.dto';
 import { FilesService } from './files.service';
@@ -22,6 +24,7 @@ export class FilesController {
   @Post('upload')
   @ResponseMessage('File uploaded successfully.')
   @UseInterceptors(FileInterceptor('fileUpload'))
+  @UseFilters(new HttpExceptionFilter())
   uploadFile(
     @UploadedFile()
     file: Express.Multer.File,
